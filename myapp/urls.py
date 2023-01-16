@@ -21,4 +21,7 @@ urlpatterns = [
     path('', views.index, name='index'),
     path('project2', views.project2, name='project2'),
     path('project1', views.project1, name='project1'),
+    path('getCategoryValues', views.getCategoryValues, name="getCategoryValues"),
+    path('getDateValuesData', views.getDateValuesData, name="getDateValuesData"),
+    path('getCategoryValuesData', views.getCategoryValuesData, name="getCategoryValuesData"),
 ]

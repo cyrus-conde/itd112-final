@@ -5,14 +5,16 @@
     <title>Home | ITD112</title>
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    {% load static %}
     <style>
         body {
-            background-image: url("https://e0.pxfuel.com/wallpapers/609/188/desktop-wallpaper-fastest-data-data-visualization.jpg");
+            background-image: url("{% static 'images/itd112.png' %}");
             -webkit-background-size: cover;
             -moz-background-size: cover;
             background-size: cover;
             -o-background-size: cover;
             background-repeat: no-repeat;
+            height: 100vh;
         }
              
     </style>

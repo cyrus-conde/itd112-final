@@ -6,9 +6,8 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
     <!-- highchart js-->
     <script src="https://code.highcharts.com/highcharts.js"></script>
-    <script src="https://code.highcharts.com/modules/data.js"></script>
     <script src="https://code.highcharts.com/modules/exporting.js"></script>
-    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/export-data.js"></script>
     <script src="https://code.highcharts.com/modules/accessibility.js"></script>
 
 
@@ -21,6 +20,7 @@
         .highcharts-data-table table {
           min-width:80vw;
           margin: 1em;
+          border: 1px solid black;
         }
 
         .highcharts-data-table table {
@@ -79,8 +79,22 @@
         </div>
     </nav>
     <div class="container-fluid">
+        
         <h1 style="display:flex;justify-content:center">ITD 112 - Project 1</h1>
         <figure class="highcharts-figure">
+            <form class="form-group" action="">
+                <select class="form-select" id="selectCategory" aria-label="Default select example">
+                    <option value="Daily" selected>Daily</option>
+                    <option value="MonthYear">Month-Year</option>
+                    <option value="Year">Year</option>
+                    <option value="City">City</option>
+                    <option value="Region">Region</option>
+                  </select>
+                  <select class="form-select" id="categoryValues" aria-label="Default select example" hidden="true">
+                    <option selected disabled hidden>Select Values</option>
+                  </select>
+                 
+            </form>
             <div id="container"></div>
         </figure>
         <figure class="highcharts-figure">
@@ -93,7 +107,115 @@
     
 
     <script>
+        
+        $(document).ready(function(){
+                    
+            $("#selectCategory").change(function(e){
+                e.preventDefault();
+                var categoryName = $(this).children("option:selected").val();
+                if(categoryName === "MonthYear" || categoryName === "Year" || categoryName === "Daily"){
+                    $('#categoryValues').attr("hidden", true);
+                    $.ajax({
+                        type: "GET",
+                        url: "/getDateValuesData",
+                        data: {cname: categoryName},
+                        success: function (data) {
+                            //add here the data
+                            _categoryForLineChart = data['new_date'];
+                            _casesForLineChart = data['cases'].map(Number);
+                            _deathsForLineChart = data['deaths'].map(Number);
+                            _subtitle = data['subtitle'];
+                            var chart = Highcharts.charts.find(chart => chart.renderTo.id === 'container');
+                            chart.update({
+                                title: {
+                                    text: 'Dengue Cases'
+                                },
+                                subtitle:{
+                                    text: _subtitle
+                                },
+                                xAxis: {
+                                    title: {
+                                        text: 'Date'
+                                    },
+                                    categories: _categoryForLineChart
+                                },
+                                series: [{
+                                    name: 'Dengue Cases',
+                                    data: _casesForLineChart ,
+                                    lineWidth: 0.5
+                                }, {
+                                    name: 'Deaths',
+                                    data: _deathsForLineChart,
+                                    lineWidth: 0.5
 
+                                }]
+                            });
+                        }
+                    });
+                }else{
+                    $('#categoryValues').attr("hidden", false);
+                    $.ajax({
+                        type: "GET",
+                        url: "/getCategoryValues",
+                        data: {cname: categoryName},
+                        success: function (data) {
+                            $('#categoryValues').empty().append($("<option selected disabled hidden>Select Values</option>"));
+                            $.each(data, function(key, value) {   
+                                $('#categoryValues')
+                                    .append($("<option></option>")
+                                                .attr("value", value)
+                                                .text(value)); 
+                            });
+                                    
+                        }
+                    });
+                }
+                        
+            });
+
+            $("#categoryValues").change(function(e){
+                e.preventDefault();
+                var categoryName = $('#selectCategory').children("option:selected").val();
+                var valueName = $(this).children("option:selected").val();
+                $.ajax({
+                    type: "GET",
+                    url: "/getCategoryValuesData",
+                    data: {vname: valueName, cname: categoryName},
+                    success: function (data) {
+                        _categoryForLineChart = data['date'];
+                        _casesForLineChart = data['cases'].map(Number);
+                        _deathsForLineChart = data['deaths'].map(Number);
+                        _subtitle = data['subtitle'];
+                        var chart = Highcharts.charts.find(chart => chart.renderTo.id === 'container');
+                        chart.update({
+                            title: {
+                                text: 'Dengue Cases in ' + valueName
+                            },
+                            subtitle: {
+                                text: _subtitle
+                            },
+                            xAxis: {
+                                title: {
+                                    text: 'Date'
+                                },
+                                categories: _categoryForLineChart
+                            },
+                            series: [{
+                                name: 'Dengue Cases',
+                                data: _casesForLineChart ,
+                                lineWidth: 0.5
+                            }, {
+                                name: 'Deaths',
+                                data: _deathsForLineChart,
+                                lineWidth: 0.5
+                            }]
+                        });
+                    }
+                });
+            });
+
+                    
+        });            
         _dates = {{ date|safe }}
         _cases = {{ cases|safe }}
         _deaths = {{ deaths|safe }}
@@ -109,7 +231,13 @@
                 zoomType: 'x'
             },
             title: {
-                text: 'Dengue Cases'
+                text: 'Dengue Cases in 2016-2021'
+            },
+            subtitle: {
+                text: 'The daily data visualization of the dengue dataset clearly illustrates the trend of higher reported cases compared to deaths, with a notable decrease in cases during the mid of 2020.'
+            },
+            caption: {
+                text: 'This is a Line Chart, highlight the lines to zoom, and you can click the hamburger menu located at the top-right of this container for more options. You can see the deaths bar graph only by highlighting only the deaths.'
             },
             accessibility: {
                 screenReaderSection: {
@@ -153,7 +281,9 @@
             title: {
                 text: 'Dengue Cases By Region'
             },
-
+            subtitle: {
+                text: 'The diagram below shows a bar graph of dengue cases by region in the Philippines from year 2016 to 2021. It shows the Region III as the highest with 109195 cases, and the BARMM as the lowest with 11540 cases. Click the hamburger menu located at the top-right of this container for more options. You can see the deaths bar graph only by highlighting only the deaths.'
+            },
             xAxis: {
                 categories: _regionNames,
                 crosshair: true
@@ -192,7 +322,13 @@
                 type: 'area'
             },
             title: {
-                text: 'Dengue Cases by Loc (City)'
+                text: 'Dengue Cases by Location'
+            },
+            subtitle: {
+                text: 'The diagram below shows a stacked area chart of dengue cases by location in the Philippines from year 2016 to 2021. You can hover your mouse on the lines to see the number of cases and deaths of each location. Click the hamburger menu located at the top-right of this container for more options. You can see the deaths bar graph only by highlighting only the deaths.'
+            },
+            caption: {
+                text: ''
             },
             xAxis: {
                 categories: _locNames
