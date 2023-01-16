@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project 1 | ITD112</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- highchart js-->
+    <script src="https://code.highcharts.com/highcharts.js"></script>
+    <script src="https://code.highcharts.com/modules/data.js"></script>
+    <script src="https://code.highcharts.com/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/modules/accessibility.js"></script>
+
+
+   
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        .highcharts-figure,
+        .highcharts-data-table table {
+          min-width:80vw;
+          margin: 1em;
+        }
+
+        .highcharts-data-table table {
+          font-family: Verdana, sans-serif;
+          border-collapse: collapse;
+          border: 1px solid #ebebeb;
+          margin: 10px auto;
+          text-align: center;
+          width: 100%;
+          max-width: 500px;
+        }
+
+        .highcharts-data-table caption {
+          padding: 1em 0;
+          font-size: 1.2em;
+          color: #555;
+        }
+
+        .highcharts-data-table th {
+          font-weight: 600;
+          padding: 0.5em;
+        }
+
+        .highcharts-data-table td,
+        .highcharts-data-table th,
+        .highcharts-data-table caption {
+          padding: 0.5em;
+        }
+
+        .highcharts-data-table thead tr,
+        .highcharts-data-table tr:nth-child(even) {
+          background: #f8f8f8;
+        }
+
+        .highcharts-data-table tr:hover {
+          background: #f1f7ff;
+        }
+
+    </style>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand">ITD112</a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto">
+                    <a href="/" class="nav-item nav-link">Home</a>
+                    <a href="/project1" class="nav-item nav-link active">Project 1</a>
+                    <a href="/project2" class="nav-item nav-link">Project 2</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <h1 style="display:flex;justify-content:center">ITD 112 - Project 1</h1>
+        <figure class="highcharts-figure">
+            <div id="container"></div>
+        </figure>
+        <figure class="highcharts-figure">
+            <div id="casesbyregion"></div>
+        </figure>
+        <figure class="highcharts-figure">
+            <div id="casesbyloc"></div>
+        </figure>
+    </div>
+    
+
+    <script>
+
+        _dates = {{ date|safe }}
+        _cases = {{ cases|safe }}
+        _deaths = {{ deaths|safe }}
+        _regionNames = {{ region_names|safe }}
+        _regionCases = {{ rcases|safe }}
+        _regionDeaths = {{ rdeaths|safe }}
+        _locNames = {{ loc_names|safe }}
+        _locCases = {{ lcases|safe }}
+        _locDeaths = {{ ldeaths|safe }}
+        _phcityData = {{ phcityData|safe }}
+        Highcharts.chart('container', {
+            chart: {
+                zoomType: 'x'
+            },
+            title: {
+                text: 'Dengue Cases'
+            },
+            accessibility: {
+                screenReaderSection: {
+                    beforeChartFormat: '' +
+                        '<{headingTagName}>{chartTitle}</{headingTagName}>' +
+                        '<div>{chartSubtitle}</div>' +
+                        '<div>{chartLongdesc}</div>' +
+                        '<div>{xAxisDescription}</div>' +
+                        '<div>{yAxisDescription}</div>'
+                }
+            },
+            tooltip: {
+                valueDecimals: 2
+            },
+            xAxis: {
+                title: {
+                    text: 'Date'
+                },
+                categories: _dates
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Cases'
+                }
+            },
+            series: [{
+                name: 'Dengue Cases',
+                data: _cases,
+                lineWidth: 0.5
+            }, {
+                name: 'Deaths',
+                data: _deaths,
+                lineWidth: 0.5
+
+            }]
+        });
+        Highcharts.chart('casesbyregion', {
+            chart: {
+                type: 'column'
+            },
+            title: {
+                text: 'Dengue Cases By Region'
+            },
+
+            xAxis: {
+                categories: _regionNames,
+                crosshair: true
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Cases'
+                }
+            },
+            tooltip: {
+                headerFormat: '<span style="font-size:10px">{point.key}</span><table>',
+                pointFormat: '<tr><td style="color:{series.color};padding:0">{series.name}: </td>' +
+                    '<td style="padding:0"><b>{point.y:.1f}</b></td></tr>',
+                footerFormat: '</table>',
+                shared: true,
+                useHTML: true
+            },
+            plotOptions: {
+                column: {
+                    pointPadding: 0.2,
+                    borderWidth: 0
+                }
+            },
+            series: [{
+                name: 'Cases',
+                data: _regionCases
+
+            }, {
+                name: 'Deaths',
+                data: _regionDeaths
+
+            }]
+        });
+        Highcharts.chart('casesbyloc', {
+            chart: {
+                type: 'area'
+            },
+            title: {
+                text: 'Dengue Cases by Loc (City)'
+            },
+            xAxis: {
+                categories: _locNames
+            },
+            yAxis: {
+                title: {
+                    text: 'Number of Cases'
+                }
+            },
+            tooltip: {
+                shared: true,
+                headerFormat: '<span style="font-size:12px"><b>{point.key}</b></span><br>'
+            },
+            plotOptions: {
+                area: {
+                    stacking: 'normal',
+                    lineColor: '#666666',
+                    lineWidth: 1,
+                    marker: {
+                        lineWidth: 1,
+                        lineColor: '#666666'
+                    }
+                }
+            },
+            series: [{
+                name: 'Cases',
+                data: _locCases
+            }, {
+                name: 'Deaths',
+                data: _locDeaths
+
+            }]
+        });
+        
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+
+
+</html>

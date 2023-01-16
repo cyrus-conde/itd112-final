@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Project 2 | ITD112</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-EVSTQN3/azprG1Anm3QDgpJLIm9Nao0Yz1ztcQTwFspd3yD65VohhpuuCOmLASjC" crossorigin="anonymous">
+    <!-- Using latitude/longitude functionality in Highmaps requires the Proj4js library to be loaded. -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/proj4js/2.6.1/proj4.js"></script>
+    <!--highmap js-->
+
+    <script src="https://code.highcharts.com/maps/highmaps.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/data.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/offline-exporting.js"></script>
+    <script src="https://code.highcharts.com/maps/modules/accessibility.js"></script>
+    <script src="https://code.highcharts.com/mapdata/countries/ph/ph-all.js"></script>
+    <!-- jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.3/jquery.min.js" integrity="sha512-STof4xm1wgkfm7heWqFJVn58Hm3EtS31XFaagaa8VMReCXAkQnJZ+jEy8PCC/iT18dFy95WcExNHFTqLyp72eQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+    <style>
+        .highcharts-figure,
+        .highcharts-data-table table {
+          min-width:80vw;
+          margin: 1em;
+        }
+
+        .highcharts-data-table table {
+          font-family: Verdana, sans-serif;
+          border-collapse: collapse;
+          border: 1px solid #ebebeb;
+          margin: 10px auto;
+          text-align: center;
+          width: 100%;
+          max-width: 500px;
+        }
+
+        .highcharts-data-table caption {
+          padding: 1em 0;
+          font-size: 1.2em;
+          color: #555;
+        }
+
+        .highcharts-data-table th {
+          font-weight: 600;
+          padding: 0.5em;
+        }
+
+        .highcharts-data-table td,
+        .highcharts-data-table th,
+        .highcharts-data-table caption {
+          padding: 0.5em;
+        }
+
+        .highcharts-data-table thead tr,
+        .highcharts-data-table tr:nth-child(even) {
+          background: #f8f8f8;
+        }
+
+        .highcharts-data-table tr:hover {
+          background: #f1f7ff;
+        }
+
+    </style>
+
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+        <div class="container-fluid">
+            <a href="#" class="navbar-brand">ITD112</a>
+            <button type="button" class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#navbarCollapse">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarCollapse">
+                <div class="navbar-nav ms-auto">
+                    <a href="/" class="nav-item nav-link">Home</a>
+                    <a href="/project1" class="nav-item nav-link">Project 1</a>
+                    <a href="/project2" class="nav-item nav-link active">Project 2</a>
+                </div>
+            </div>
+        </div>
+    </nav>
+    <div class="container-fluid">
+        <h1 style="display:flex;justify-content:center">ITD 112 - Project 2</h1>
+        <figure class="highcharts-figure">
+            <div id="mapping"></div>
+        </figure>
+    </div>
+    
+
+    <script>
+
+       
+        _locNames = {{ loc_names|safe }}
+        _locCases = {{ lcases|safe }}
+        _locDeaths = {{ ldeaths|safe }}
+        _phcityData = {{ phcityData|safe }}
+        
+        // define the EPSG:4326 projection using proj4js
+        proj4.defs("EPSG:4326", "+proj=longlat +ellps=WGS84 +datum=WGS84 +no_defs");
+        /* dataset link: https://simplemaps.com/data/ph-cities*/
+        let markers = _phcityData.map(function(p) {
+            return {
+                lng: p.lng,
+                lat: p.lat,
+                name: p.province,
+                population: p.population
+            };
+        });
+
+        Highcharts.mapChart('mapping', {
+
+            chart: {
+                map: 'countries/ph/ph-all',
+                projection: 'EPSG:4326'
+            },
+
+            title: {
+                text: 'Philippines Population by Region'
+            },
+            mapNavigation: {
+                enabled: true
+            },
+            series: [{
+                accessibility: {
+                    point: {
+                        valueDescriptionFormat: '{point.population}'
+                    }
+                },
+                animation: {
+                    duration: 1000
+                },
+                data: markers,
+                joinBy: ['name', 'name'],
+                dataLabels: {
+                    enabled: true,
+                    color: '#FFFFFF',
+                    format: '{point.name}'
+                },
+                name: 'Population',
+
+                tooltip: {
+                    pointFormat: '{point.name}: {point.population}'
+                }
+            }]
+        });
+
+
+
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.0.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-MrcW6ZMFYlzcLA8Nl+NtUVF0sA7MsXsP1UyJoMp4YLEuNSfAP+JcXn/tWtIaxVXM" crossorigin="anonymous"></script>
+</body>
+
+
+</html>
