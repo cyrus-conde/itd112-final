@@ -1,9 +1,5 @@
 from django.shortcuts import render
-from django.http import JsonResponse
 import pandas as pd
-from json import dumps
-import matplotlib.pyplot as plt
-import roman
 
 # load the dengue dataset
 dengueds = pd.read_csv('myapp/doh-epi-dengue-data-2016-2021.csv')
